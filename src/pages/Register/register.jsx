@@ -4,13 +4,15 @@ import Lottie from "lottie-react";
 import toast from "react-hot-toast";
 import registerLottie from "../../assets/lottie/register.json";
 import { AuthContext } from "../../context/authContext/auth-contex";
+import { useNavigate } from "react-router-dom";
+import SocialLogin from "../../pages/Shared/social-login";
 
 const Register = () => {
   const { createUser } = useContext(AuthContext);
+  const navigate = useNavigate();
 
   const handleRegister = (e) => {
     e.preventDefault();
-
     const form = e.target;
     const email = form.email.value;
     const password = form.password.value;
@@ -26,6 +28,7 @@ const Register = () => {
         console.log(result.user);
         toast.success("Registration successful!");
         form.reset();
+        navigate("/");
       })
       .catch((error) => toast.error(error.message));
   };
@@ -54,7 +57,6 @@ const Register = () => {
             </div>
 
             <form onSubmit={handleRegister} className="space-y-4">
-              {/* Email */}
               <div className="form-control">
                 <label className="label"><span className="label-text">Email</span></label>
                 <div className="relative">
@@ -69,7 +71,6 @@ const Register = () => {
                 </div>
               </div>
 
-              {/* Password */}
               <div className="form-control">
                 <label className="label"><span className="label-text">Password</span></label>
                 <div className="relative">
@@ -85,7 +86,6 @@ const Register = () => {
                 </div>
               </div>
 
-              {/* Terms */}
               <div className="form-control mt-4">
                 <label className="cursor-pointer label justify-start gap-3">
                   <input type="checkbox" name="agreeTerms" className="checkbox checkbox-sm" required />
@@ -96,13 +96,15 @@ const Register = () => {
               <button type="submit" className="btn btn-primary w-full mt-2">
                 Register <ArrowRight className="w-4 h-4 ml-2" />
               </button>
-
-              <div className="text-center mt-4">
-                <p className="text-sm text-base-content/60">
-                  Already have an account? <a href="/sign" className="link link-primary">Sign in</a>
-                </p>
-              </div>
             </form>
+
+            <SocialLogin />
+
+            <div className="text-center mt-4">
+              <p className="text-sm text-base-content/60">
+                Already have an account? <a href="/sign" className="link link-primary">Sign in</a>
+              </p>
+            </div>
           </div>
         </div>
       </div>

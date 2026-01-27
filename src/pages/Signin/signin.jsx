@@ -2,16 +2,19 @@ import React, { useContext, useState } from "react";
 import { Mail, Lock, ArrowRight, Users } from "lucide-react";
 import toast from "react-hot-toast";
 import { AuthContext } from "../../context/authContext/auth-contex";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
+import SocialLogin from "../../pages/Shared/social-login";
 
 const Signin = () => {
   const { signInUser } = useContext(AuthContext);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  const location = useLocation();
+  const from = location.state || '/'
+
   const handleSignIn = (e) => {
     e.preventDefault();
-
     const form = e.target;
     const email = form.email.value;
     const password = form.password.value;
@@ -25,9 +28,7 @@ const Signin = () => {
         form.reset();
         navigate("/"); 
       })
-      .catch((error) => {
-        toast.error(error.message);
-      })
+      .catch((error) => toast.error(error.message))
       .finally(() => setLoading(false));
   };
 
@@ -44,7 +45,6 @@ const Signin = () => {
           </div>
 
           <form onSubmit={handleSignIn} className="space-y-4">
-            {/* Email */}
             <div className="form-control">
               <label className="label"><span className="label-text">Email</span></label>
               <div className="relative">
@@ -59,7 +59,6 @@ const Signin = () => {
               </div>
             </div>
 
-            {/* Password */}
             <div className="form-control">
               <label className="label"><span className="label-text">Password</span></label>
               <div className="relative">
@@ -77,13 +76,15 @@ const Signin = () => {
             <button type="submit" className={`btn btn-primary w-full mt-2 ${loading ? "loading" : ""}`}>
               Sign In <ArrowRight className="w-4 h-4 ml-2" />
             </button>
-
-            <div className="text-center mt-4">
-              <p className="text-sm text-base-content/60">
-                Don't have an account? <a href="/register" className="link link-primary">Register</a>
-              </p>
-            </div>
           </form>
+
+          <SocialLogin  from={from}/>
+
+          <div className="text-center mt-4">
+            <p className="text-sm text-base-content/60">
+              Don't have an account? <a href="/register" className="link link-primary">Register</a>
+            </p>
+          </div>
         </div>
       </div>
     </div>
