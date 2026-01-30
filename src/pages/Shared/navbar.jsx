@@ -1,252 +1,220 @@
-import React, { useContext } from "react";
+import { useContext, useState } from "react";
 import { NavLink, useNavigate } from "react-router-dom";
-import { Menu, Home, Briefcase, Users, Sparkles, LogOut, UserCircle, Bell, X } from "lucide-react";
+import {
+  Menu,
+  X,
+  Home,
+  Briefcase,
+  Sparkles,
+  LogOut,
+  Bell,
+  Crown,
+  ChevronDown,
+  Drone,
+} from "lucide-react";
 import { AuthContext } from "../../context/authContext/auth-contex";
 import toast from "react-hot-toast";
 
 const Navbar = () => {
   const { user, signOutUser } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [search, setSearch] = useState("");
 
-  const handleLogout = () => {
+  const logout = () => {
     signOutUser()
       .then(() => {
-        toast.success("Logged out successfully!");
-        navigate("/sign");
-        setIsMenuOpen(false);
+        toast.success("Logged out");
+        navigate("/");
+        setOpen(false);
+        setProfileOpen(false);
       })
       .catch((err) => toast.error(err.message));
   };
 
-  // Job Portal এর জন্য Nav Items
-  const navItems = [
-    { path: "/", label: "Home", icon: <Home className="w-5 h-5" /> },
-    { path: "/jobs", label: "Find Jobs", icon: <Briefcase className="w-5 h-5" /> },
-    { path: "/companies", label: "Companies", icon: <Users className="w-5 h-5" /> },
-    { path: "/career-advice", label: "Career Tips", icon: <Sparkles className="w-5 h-5" /> },
-  ];
+  // Main links visible to all users
+  const mainLinks = [
+    { to: "/", label: "Home", icon: <Home className="w-4 h-4" /> },
+    !user && { to: "/register", label: "Register", icon: <Sparkles className="w-4 h-4" /> },
+    !user && { to: "/signin", label: "Sign In", icon: <Sparkles className="w-4 h-4" /> },
+    user && { to: "/addjob", label: "Add Job", icon: <Drone className="w-4 h-4" /> },
+    user && { to: "/myPostedJobs", label: "My Jobs", icon: <Briefcase className="w-4 h-4" /> },
+  ].filter(Boolean);
 
-  // User-specific nav items
-  const userNavItems = user ? [
-    { path: "/dashboard", label: "Dashboard", icon: <Briefcase className="w-5 h-5" /> },
-    { path: "/myApplications", label: "My Applications", icon: <Sparkles className="w-5 h-5" /> },
-    { path: "/profile", label: "My Profile", icon: <UserCircle className="w-5 h-5" /> },
-  ] : [];
+  // Links visible inside user profile dropdown
+  const userLinks = [
+    { to: "/myApplications", label: "My Applications", icon: <Sparkles className="w-4 h-4" /> },
+    user && { to: "/applications", label: "View Applications", icon: <Briefcase className="w-4 h-4" /> },
+  ].filter(Boolean);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (search.trim()) {
+      navigate(`/?search=${encodeURIComponent(search)}`);
+      setSearch("");
+      setOpen(false);
+    }
+  };
 
   return (
-    <nav className="navbar bg-base-100 shadow-md px-4 sticky top-0 z-50 border-b">
-      {/* Logo and Brand */}
-      <div className="navbar-start">
-        <NavLink to="/" className="flex items-center gap-2" onClick={() => setIsMenuOpen(false)}>
-          <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
-            <Briefcase className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-              Carrier Code
-            </span>
-            <div className="text-xs text-gray-500">Career Success</div>
-          </div>
-        </NavLink>
-      </div>
-
-      {/* Right Side - Menu Button and User Actions */}
-      <div className="navbar-end flex items-center gap-3">
-        {/* Notification Bell (only for logged in users) */}
-        {user && (
-          <button className="btn btn-ghost btn-circle relative">
-            <Bell className="w-5 h-5" />
-            <span className="absolute -top-1 -right-1 bg-error text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-              3
-            </span>
-          </button>
-        )}
-
-        {/* Get Started Button (for non-logged in users) */}
-        {!user && (
-          <NavLink 
-            to="/register" 
-            className="btn btn-primary btn-sm hidden sm:flex gap-1"
-            onClick={() => setIsMenuOpen(false)}
-          >
-            <Sparkles className="w-4 h-4" />
-            <span className="hidden xs:inline">Get Started</span>
+    <nav className="sticky top-0 z-50 bg-gradient-to-r from-amber-50 via-amber-100 to-yellow-50 border-b border-amber-200 shadow-sm">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
+          <NavLink to="/" className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+              <Crown className="w-4 h-4 text-white" />
+            </div>
+            <span className="text-xl font-bold text-amber-900">CareerCode</span>
           </NavLink>
-        )}
 
-        {/* User Avatar (for logged in users) */}
-        {user && (
-          <button className="flex items-center gap-2">
-            <div className="avatar placeholder">
-              <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full w-8 h-8 flex items-center justify-center">
-                <span className="text-sm font-semibold">
-                  {user.email?.charAt(0).toUpperCase()}
-                </span>
-              </div>
-            </div>
-          </button>
-        )}
-
-        {/* Menu Button */}
-        <button 
-          className="btn btn-ghost"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-          aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-        >
-          {isMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </button>
-      </div>
-
-      {/* Full Screen Mobile Menu */}
-      {isMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-black/50" onClick={() => setIsMenuOpen(false)}>
-          <div 
-            className="fixed top-0 right-0 h-full w-4/5 max-w-sm bg-base-100 shadow-2xl z-50 overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            {/* Menu Header */}
-            <div className="p-4 border-b flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-2 rounded-lg">
-                  <Briefcase className="w-6 h-6 text-white" />
-                </div>
-                <div>
-                  <div className="font-bold text-lg">Carrier Code</div>
-                  <div className="text-xs text-gray-500">Job Portal</div>
-                </div>
-              </div>
-              <button 
-                className="btn btn-ghost btn-circle"
-                onClick={() => setIsMenuOpen(false)}
+          {/* Desktop Links */}
+          <div className="hidden md:flex items-center gap-1 flex-1 justify-center">
+            {mainLinks.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                className={({ isActive }) =>
+                  `flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium ${
+                    isActive
+                      ? "text-amber-800 bg-amber-100"
+                      : "text-amber-900 hover:text-amber-800 hover:bg-amber-100"
+                  }`
+                }
               >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
+                {link.icon}
+                {link.label}
+              </NavLink>
+            ))}
+          </div>
 
-            {/* User Info Section */}
-            {user && (
-              <div className="p-4 border-b bg-gradient-to-r from-blue-50 to-purple-50">
-                <div className="flex items-center gap-3">
-                  <div className="avatar placeholder">
-                    <div className="bg-gradient-to-r from-blue-500 to-purple-500 text-white rounded-full w-12 h-12 flex items-center justify-center">
-                      <span className="text-lg font-bold">
-                        {user.email?.charAt(0).toUpperCase()}
-                      </span>
+          {/* Right Side */}
+          <div className="flex items-center gap-3">
+            {user ? (
+              <div className="hidden md:flex items-center gap-3">
+                {/* Notification */}
+                <button className="p-2 text-amber-700 hover:text-amber-900 relative">
+                  <Bell className="w-5 h-5" />
+                </button>
+
+                {/* Profile */}
+                <div className="relative">
+                  <button
+                    onClick={() => setProfileOpen(!profileOpen)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-amber-100 text-amber-900"
+                  >
+                    <div className="w-8 h-8 rounded-full bg-amber-500 flex items-center justify-center text-white font-bold text-sm">
+                      {user.email?.[0]?.toUpperCase() || "U"}
                     </div>
-                  </div>
-                  <div className="flex-1">
-                    <div className="font-semibold">My Account</div>
-                    <div className="text-sm text-gray-600 truncate">{user.email}</div>
-                  </div>
+                    <ChevronDown
+                      className={`w-4 h-4 transition ${profileOpen ? "rotate-180" : ""}`}
+                    />
+                  </button>
+
+                  {profileOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-amber-50 rounded-lg shadow-lg border z-50">
+                      {userLinks.map((link) => (
+                        <NavLink
+                          key={link.to}
+                          to={link.to}
+                          onClick={() => setProfileOpen(false)}
+                          className="flex items-center gap-3 px-4 py-3 hover:bg-amber-100 text-amber-900"
+                        >
+                          {link.icon}
+                          {link.label}
+                        </NavLink>
+                      ))}
+                      <button
+                        onClick={logout}
+                        className="flex w-full items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 border-t"
+                      >
+                        <LogOut className="w-4 h-4" />
+                        Logout
+                      </button>
+                    </div>
+                  )}
                 </div>
+              </div>
+            ) : (
+              <div className="hidden md:flex items-center gap-2">
+                <NavLink
+                  to="/signin"
+                  className="px-4 py-2 text-sm text-amber-900 hover:text-amber-800"
+                >
+                  Sign In
+                </NavLink>
+                <NavLink
+                  to="/register"
+                  className="px-4 py-2 bg-amber-500 text-white rounded-lg text-sm hover:bg-amber-600"
+                >
+                  Get Started
+                </NavLink>
               </div>
             )}
 
-            {/* Main Navigation */}
-            <div className="p-4">
-              <div className="space-y-1">
-                <div className="text-xs uppercase text-gray-500 font-semibold px-2 py-2">
-                  Main Menu
-                </div>
-                {navItems.map((item) => (
-                  <NavLink
-                    key={item.path}
-                    to={item.path}
-                    onClick={() => setIsMenuOpen(false)}
-                    className={({ isActive }) =>
-                      `flex items-center gap-3 p-3 rounded-lg ${isActive 
-                        ? 'bg-primary/10 text-primary font-semibold' 
-                        : 'hover:bg-gray-100'
-                      }`
-                    }
-                  >
-                    <div className={`${({ isActive }) => isActive ? 'text-primary' : 'text-gray-600'}`}>
-                      {item.icon}
-                    </div>
-                    <span className="text-base">{item.label}</span>
-                  </NavLink>
-                ))}
-              </div>
+            {/* Mobile Menu Button */}
+            <button onClick={() => setOpen(!open)} className="md:hidden p-2 text-amber-900">
+              {open ? <X /> : <Menu />}
+            </button>
+          </div>
+        </div>
+      </div>
 
-              {/* User Specific Menu */}
-              {userNavItems.length > 0 && (
-                <div className="mt-6 space-y-1">
-                  <div className="text-xs uppercase text-gray-500 font-semibold px-2 py-2">
-                    My Account
-                  </div>
-                  {userNavItems.map((item) => (
-                    <NavLink
-                      key={item.path}
-                      to={item.path}
-                      onClick={() => setIsMenuOpen(false)}
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 p-3 rounded-lg ${isActive 
-                          ? 'bg-primary/10 text-primary font-semibold' 
-                          : 'hover:bg-gray-100'
-                        }`
-                      }
-                    >
-                      <div className={`${({ isActive }) => isActive ? 'text-primary' : 'text-gray-600'}`}>
-                        {item.icon}
-                      </div>
-                      <span className="text-base">{item.label}</span>
-                    </NavLink>
-                  ))}
-                </div>
-              )}
-            </div>
+      {/* Mobile Menu */}
+      {open && (
+        <div className="md:hidden bg-amber-50 border-t border-amber-200">
+          <div className="p-4 grid grid-cols-2 gap-2">
+            {mainLinks.map((link) => (
+              <NavLink
+                key={link.to}
+                to={link.to}
+                onClick={() => setOpen(false)}
+                className="p-4 border rounded-lg text-center text-amber-900 hover:bg-amber-100"
+              >
+                {link.icon}
+                <p>{link.label}</p>
+              </NavLink>
+            ))}
+          </div>
 
-            {/* Authentication Buttons */}
-            <div className="p-4 border-t mt-4">
-              {user ? (
-                <div className="space-y-3">
-                  <button
-                    onClick={handleLogout}
-                    className="btn btn-error w-full gap-2"
-                  >
-                    <LogOut className="w-5 h-5" />
-                    Logout
-                  </button>
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  <NavLink
-                    to="/login"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="btn btn-outline w-full"
-                  >
-                    Sign In
-                  </NavLink>
-                  <NavLink
-                    to="/register"
-                    onClick={() => setIsMenuOpen(false)}
-                    className="btn btn-primary w-full gap-2"
-                  >
-                    <Sparkles className="w-5 h-5" />
-                    Get Started Free
-                  </NavLink>
-                </div>
-              )}
-            </div>
+          <div className="p-4 border-t border-amber-200">
+            <form onSubmit={handleSearch} className="relative">
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search jobs..."
+                className="w-full pl-10 pr-4 py-2 border rounded-lg border-amber-200 bg-amber-50 text-amber-900 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-300"
+              />
+            </form>
+          </div>
 
-            {/* Footer Section */}
-            <div className="p-4 border-t">
-              <div className="text-xs text-gray-500 text-center">
-                © {new Date().getFullYear()} Carrier Code
+          <div className="p-4 border-t border-amber-200">
+            {user ? (
+              <button
+                onClick={logout}
+                className="w-full py-3 text-red-600 border rounded-lg hover:bg-red-50"
+              >
+                Logout
+              </button>
+            ) : (
+              <div className="grid grid-cols-2 gap-3">
+                <NavLink
+                  to="/signin"
+                  onClick={() => setOpen(false)}
+                  className="text-amber-900 hover:text-amber-800"
+                >
+                  Sign In
+                </NavLink>
+                <NavLink
+                  to="/register"
+                  onClick={() => setOpen(false)}
+                  className="bg-amber-500 text-white rounded-lg px-3 py-2 hover:bg-amber-600"
+                >
+                  Register
+                </NavLink>
               </div>
-              <div className="flex justify-center gap-4 mt-3">
-                <a href="/privacy" className="text-xs text-gray-500 hover:text-primary">
-                  Privacy
-                </a>
-                <a href="/terms" className="text-xs text-gray-500 hover:text-primary">
-                  Terms
-                </a>
-                <a href="/contact" className="text-xs text-gray-500 hover:text-primary">
-                  Contact
-                </a>
-              </div>
-            </div>
+            )}
           </div>
         </div>
       )}
