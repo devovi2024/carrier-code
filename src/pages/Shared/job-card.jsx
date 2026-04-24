@@ -7,14 +7,11 @@ const JobCard = ({ job }) => {
   const [saved, setSaved] = useState(false);
   const [viewed, setViewed] = useState(false);
 
-
-
   return (
     <div className="group relative">
       <div className="absolute -inset-0.5 bg-gradient-to-br from-amber-400 via-orange-400 to-amber-300 rounded-2xl opacity-0 group-hover:opacity-100 blur transition-all duration-500" />
-      
+
       <div className="relative bg-gradient-to-b from-white to-amber-50/80 backdrop-blur-sm rounded-2xl border border-amber-200/30 shadow-lg shadow-amber-100/30 hover:shadow-2xl hover:shadow-amber-200/50 transition-all duration-500 hover:-translate-y-2 overflow-hidden">
-        
         <div className="p-5">
           <div className="flex items-start justify-between mb-4">
             <div className="flex items-center gap-3">
@@ -34,7 +31,7 @@ const JobCard = ({ job }) => {
                   )}
                 </div>
               </div>
-              
+
               <div className="flex-1">
                 <h3 className="font-bold text-[#6B2F12] group-hover:text-[#8C3B00] transition-colors line-clamp-2">
                   {title}
@@ -45,11 +42,13 @@ const JobCard = ({ job }) => {
 
             <button
               onClick={() => setSaved(!saved)}
-              className="relative p-2 rounded-full bg-white/80 backdrop-blur-sm border border-amber-200/50 hover:border-amber-300 transition-all duration-300 group/save"
+              className="relative p-2 rounded-full bg-white/80 backdrop-blur-sm border border-amber-200/50 hover:border-amber-300 transition-all duration-300"
             >
-              <Bookmark className={`w-5 h-5 transition-all duration-300 ${
-                saved ? "fill-amber-500 text-amber-500" : "text-amber-600 group-hover/save:text-amber-500"
-              }`} />
+              <Bookmark
+                className={`w-5 h-5 transition-all duration-300 ${
+                  saved ? "fill-amber-500 text-amber-500" : "text-amber-600 hover:text-amber-500"
+                }`}
+              />
               {!viewed && (
                 <div className="absolute -top-1 -right-1 w-3 h-3 bg-amber-500 rounded-full animate-ping" />
               )}
@@ -61,15 +60,12 @@ const JobCard = ({ job }) => {
               <MapPin className="w-3.5 h-3.5 text-amber-600" />
               <span className="text-xs font-medium text-amber-800">{location}</span>
             </div>
-            
+
             <div className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg border border-amber-200/50">
               <Clock className="w-3.5 h-3.5 text-amber-600" />
               <span className="text-xs font-medium text-amber-800">{jobType}</span>
             </div>
-      
           </div>
-
-
 
           <div className="pt-4 border-t border-amber-200/50 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -77,7 +73,7 @@ const JobCard = ({ job }) => {
                 <span className="text-xs font-bold text-emerald-800">Quick Apply</span>
               </div>
             </div>
-            
+
             <Link to={`/jobs/${_id}`} onClick={() => setViewed(true)}>
               <button className="group/btn flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 text-white rounded-xl font-medium hover:shadow-lg hover:shadow-amber-200/50 transition-all duration-300">
                 <span>Explore</span>

@@ -1,45 +1,48 @@
-import { createBrowserRouter } from 'react-router-dom'
-import RootLayout from '../Layout/root-layout'
-import Home from '../pages/Home/home'
-import Register from '../pages/Register/register'
-import Signin from '../pages/Signin/signin'
-import JobDetails from '../pages/Home/Jobs/job-details'
-import PrivateRoute from '../routes/private-route'
-import JobApply from '../pages/Home/Jobs/job-apply'
-import MyApplication from '../pages/Applications/my-application'
-import AddJob from '../pages/admin/Jobs/add-job'
-import MyPostedJobs from '../pages/MyPostedJobs/my-posted.jobs'
-import ViewApplications from '../pages/ViewApplications/view-applications'
+import { createBrowserRouter } from "react-router-dom";
+import RootLayout from "../Layout/root-layout";
+import Home from "../pages/Home/home";
+import Register from "../pages/Register/register";
+import Signin from "../pages/Signin/signin";
+import JobDetails from "../pages/Home/Jobs/job-details";
+import PrivateRoute from "../routes/private-route";
+import JobApply from "../pages/Home/Jobs/job-apply";
+import MyApplication from "../pages/Applications/my-application";
+import AddJob from "../pages/admin/Jobs/add-job";
+import MyPostedJobs from "../pages/MyPostedJobs/my-posted.jobs";
+import ViewApplications from "../pages/ViewApplications/view-applications";
+import NotFound from "../pages/NotFound/not-found";
 
-// Loader functions
+const BASE_URL = "https://carriercode-server.vercel.app";
+
 const loadJob = async ({ params }) => {
-  const res = await fetch(`http://localhost:4000/jobs/${params.id}`)
-  return res.json()
-}
+  const res = await fetch(`${BASE_URL}/jobs/${params.id}`);
+  if (!res.ok) throw new Response("Failed to load job", { status: 500 });
+  return res.json();
+};
 
 const loadJobApplications = async ({ params }) => {
-  const res = await fetch(`http://localhost:4000/applications/jobs/${params.job_id}`)
-  return res.json()
-}
+  const res = await fetch(`${BASE_URL}/applications/jobs/${params.job_id}`);
+  if (!res.ok) throw new Response("Failed to load applications", { status: 500 });
+  return res.json();
+};
 
 const loadAllApplications = async () => {
-  const res = await fetch(`http://localhost:4000/applications`)
-  return res.json()
-}
+  const res = await fetch(`${BASE_URL}/applications`);
+  if (!res.ok) throw new Response("Failed to load applications", { status: 500 });
+  return res.json();
+};
 
 const router = createBrowserRouter([
   {
-    path: '/',
+    path: "/",
     element: <RootLayout />,
     children: [
       { index: true, element: <Home /> },
 
-      // Job details
-      { path: '/jobs/:id', element: <JobDetails />, loader: loadJob },
+      { path: "/jobs/:id", element: <JobDetails />, loader: loadJob },
 
-      // Job apply (private)
       {
-        path: '/jobApply/:id',
+        path: "/jobApply/:id",
         element: (
           <PrivateRoute>
             <JobApply />
@@ -47,9 +50,8 @@ const router = createBrowserRouter([
         ),
       },
 
-      // My Applications (user)
       {
-        path: '/myApplications',
+        path: "/myApplications",
         element: (
           <PrivateRoute>
             <MyApplication />
@@ -57,9 +59,8 @@ const router = createBrowserRouter([
         ),
       },
 
-      // Add job (admin/user)
       {
-        path: '/addjob',
+        path: "/addjob",
         element: (
           <PrivateRoute>
             <AddJob />
@@ -67,9 +68,8 @@ const router = createBrowserRouter([
         ),
       },
 
-      // My posted jobs
       {
-        path: '/myPostedJobs',
+        path: "/myPostedJobs",
         element: (
           <PrivateRoute>
             <MyPostedJobs />
@@ -77,9 +77,8 @@ const router = createBrowserRouter([
         ),
       },
 
-      // View all applications
       {
-        path: '/applications',
+        path: "/applications",
         element: (
           <PrivateRoute>
             <ViewApplications />
@@ -88,9 +87,8 @@ const router = createBrowserRouter([
         loader: loadAllApplications,
       },
 
-      // View applications for specific job
       {
-        path: '/applications/:job_id',
+        path: "/applications/:job_id",
         element: (
           <PrivateRoute>
             <ViewApplications />
@@ -99,10 +97,12 @@ const router = createBrowserRouter([
         loader: loadJobApplications,
       },
 
-      { path: '/register', element: <Register /> },
-      { path: '/signin', element: <Signin /> },
+      { path: "/register", element: <Register /> },
+      { path: "/signin", element: <Signin /> },
+
+      { path: "*", element: <NotFound /> },
     ],
   },
-])
+]);
 
-export default router
+export default router;

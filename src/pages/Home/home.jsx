@@ -1,28 +1,41 @@
-import React, { Suspense } from 'react';
-import HotJobs from './Jobs/hot-jobs';
-import Banner from './banner';
+import { useEffect, useState } from "react";
+import HotJobs from "./Jobs/hot-jobs";
+import Banner from "./banner";
 
-async function fetchJobs() {
-  const res = await fetch('http://localhost:4000/jobs');
-  if (!res.ok) throw new Error('Failed to fetch jobs');
-  return res.json();
-}
-
-const jobsPromise = fetchJobs();
-
-function JobsComponent() {
-  const jobs = React.use(jobsPromise);
-  return <HotJobs jobs={jobs} />;
-}
+const BASE_URL = "https://carriercode-server.vercel.app";
 
 export default function Home() {
+  const [jobs, setJobs] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetch(`${BASE_URL}/jobs`)
+      .then((res) => {
+        if (!res.ok) {
+          throw new Error("Failed to fetch jobs");
+        }
+        return res.json();
+      })
+      .then((data) => {
+        setJobs(data);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Fetch error:", err);
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
   return (
     <div>
-      <Banner/>
-          <Suspense fallback={<p>Loading jobs...</p>}>
-      <JobsComponent />
-    </Suspense>
-    </div>
+      <Banner />
 
+      {loading && <p>Loading jobs...</p>}
+      {error && <p style={{ color: "red" }}>{error}</p>}
+
+      {!loading && !error && <HotJobs jobs={jobs} />}
+    </div>
   );
 }
