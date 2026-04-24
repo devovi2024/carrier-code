@@ -9,42 +9,56 @@ const BASE_URL = "https://carriercode-server.vercel.app";
 const AddJob = () => {
   const { user } = useAuth();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     const form = e.target;
     const formData = new FormData(form);
     const data = Object.fromEntries(formData.entries());
 
+    // salary structure
     const { salaryMin, salaryMax, currency, ...newJob } = data;
-    newJob.salaryRange = { min: salaryMin, max: salaryMax, currency };
 
-    if (newJob.requirements) {
-      newJob.requirements = newJob.requirements.split(",").map((r) => r.trim());
-    }
+    newJob.salaryRange = {
+      min: salaryMin,
+      max: salaryMax,
+      currency,
+    };
 
-    if (newJob.responsibilities) {
-      newJob.responsibilities = newJob.responsibilities
-        .split(",")
-        .map((r) => r.trim());
-    }
+    // convert comma separated to array
+    newJob.requirements = newJob.requirements
+      ? newJob.requirements.split(",").map((r) => r.trim())
+      : [];
+
+    newJob.responsibilities = newJob.responsibilities
+      ? newJob.responsibilities.split(",").map((r) => r.trim())
+      : [];
 
     newJob.status = "active";
 
-    axios
-      .post(`${BASE_URL}/jobs`, newJob)
-      .then((res) => {
-        if (res.data.insertedId) {
-          Swal.fire({
-            position: "top-end",
-            icon: "success",
-            title: "Job added successfully!",
-            showConfirmButton: false,
-            timer: 1500,
-          });
-          form.reset();
-        }
-      })
-      .catch(console.error);
+    try {
+      const res = await axios.post(`${BASE_URL}/jobs`, newJob);
+
+      if (res.data?.insertedId) {
+        Swal.fire({
+          position: "top-end",
+          icon: "success",
+          title: "Job added successfully!",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+
+        form.reset();
+      }
+    } catch (error) {
+      console.error("Job create error:", error);
+
+      Swal.fire({
+        icon: "error",
+        title: "Something went wrong!",
+        text: "Job not created",
+      });
+    }
   };
 
   return (
@@ -52,6 +66,8 @@ const AddJob = () => {
       <div className="relative w-full max-w-4xl">
         <div className="rounded-3xl shadow-xl overflow-hidden border border-amber-200 bg-gradient-to-b from-yellow-100/80 to-yellow-50/80">
           <div className="p-6 md:p-10">
+
+            {/* Header */}
             <div className="flex items-center gap-4 mb-8">
               <div className="p-4 bg-gradient-to-br from-yellow-400 to-yellow-600 rounded-3xl shadow-lg">
                 <Edit3 className="w-10 h-10 text-white" />
@@ -61,130 +77,81 @@ const AddJob = () => {
               </h1>
             </div>
 
+            {/* Form */}
             <form onSubmit={handleSubmit} className="space-y-6">
+
               <div className="grid md:grid-cols-2 gap-4">
-                <input
-                  name="title"
-                  placeholder="Job Title"
-                  required
-                  className="px-4 py-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-900 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-300"
-                />
-                <input
-                  name="company"
-                  placeholder="Company Name"
-                  required
-                  className="px-4 py-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-900 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-300"
-                />
-                <input
-                  name="location"
-                  placeholder="Location"
-                  required
-                  className="px-4 py-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-900 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-300"
-                />
-                <input
-                  name="company_logo"
-                  placeholder="Company Logo URL"
-                  className="px-4 py-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-900 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-300"
-                />
+                <input name="title" placeholder="Job Title" required className="input" />
+                <input name="company" placeholder="Company Name" required className="input" />
+                <input name="location" placeholder="Location" required className="input" />
+                <input name="company_logo" placeholder="Company Logo URL" className="input" />
               </div>
 
-              <select
-                name="category"
-                required
-                className="w-full px-4 py-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-300"
-              >
+              <select name="category" required className="input">
                 <option value="">Select Job Category</option>
                 <option value="Engineering">Engineering</option>
                 <option value="Design">Design</option>
                 <option value="Marketing">Marketing</option>
               </select>
 
-              <input
-                type="date"
-                name="deadline"
-                required
-                className="w-full px-4 py-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-300"
-              />
+              <input type="date" name="deadline" required className="input" />
 
               <div className="flex gap-6 text-amber-900 font-medium">
                 {["Remote", "Hybrid", "On-Site"].map((type) => (
-                  <label
-                    key={type}
-                    className="flex items-center gap-2 cursor-pointer"
-                  >
-                    <input
-                      type="radio"
-                      name="jobType"
-                      value={type}
-                      required
-                      className="accent-amber-400"
-                    />
+                  <label key={type} className="flex items-center gap-2">
+                    <input type="radio" name="jobType" value={type} required />
                     {type}
                   </label>
                 ))}
               </div>
 
               <div className="grid md:grid-cols-3 gap-4">
-                <input
-                  name="salaryMin"
-                  placeholder="Min Salary"
-                  required
-                  className="px-4 py-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-300"
-                />
-                <input
-                  name="salaryMax"
-                  placeholder="Max Salary"
-                  required
-                  className="px-4 py-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-300"
-                />
-                <input
-                  name="currency"
-                  placeholder="Currency"
-                  required
-                  className="px-4 py-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-900 focus:outline-none focus:ring-2 focus:ring-amber-300"
-                />
+                <input name="salaryMin" placeholder="Min Salary" required className="input" />
+                <input name="salaryMax" placeholder="Max Salary" required className="input" />
+                <input name="currency" placeholder="Currency" required className="input" />
               </div>
 
-              <textarea
-                name="description"
-                placeholder="Job Description"
-                required
-                className="w-full px-4 py-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-900 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-300"
-              />
+              <textarea name="description" placeholder="Job Description" required className="input" />
 
-              <input
-                name="requirements"
-                placeholder="Requirements (comma separated)"
-                className="w-full px-4 py-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-900 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-300"
-              />
+              <input name="requirements" placeholder="Requirements (comma separated)" className="input" />
 
-              <input
-                name="responsibilities"
-                placeholder="Responsibilities (comma separated)"
-                className="w-full px-4 py-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-900 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-300"
-              />
+              <input name="responsibilities" placeholder="Responsibilities (comma separated)" className="input" />
 
               <div className="grid md:grid-cols-3 gap-4">
                 <input
                   defaultValue={user?.email}
                   name="hr_email"
                   readOnly
-                  className="px-4 py-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-900 cursor-not-allowed"
+                  className="input cursor-not-allowed"
                 />
-                <input
-                  name="hr_name"
-                  placeholder="HR Name"
-                  className="px-4 py-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-900 placeholder-amber-400 focus:outline-none focus:ring-2 focus:ring-amber-300"
-                />
+                <input name="hr_name" placeholder="HR Name" className="input" />
               </div>
 
-              <button className="w-full py-4 bg-amber-400 hover:bg-amber-500 text-white font-bold rounded-xl shadow-md transition-colors">
+              <button className="w-full py-4 bg-amber-400 hover:bg-amber-500 text-white font-bold rounded-xl shadow-md">
                 Add Job
               </button>
+
             </form>
           </div>
         </div>
       </div>
+
+      {/* small reusable style */}
+      <style>{`
+        .input {
+          width: 100%;
+          padding: 12px;
+          border-radius: 10px;
+          border: 1px solid #f3d19c;
+          background: #fff7ed;
+          color: #7c2d12;
+          outline: none;
+        }
+        .input:focus {
+          border-color: #f59e0b;
+          box-shadow: 0 0 0 2px #fde68a;
+        }
+      `}</style>
     </div>
   );
 };
